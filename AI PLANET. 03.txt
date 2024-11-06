@@ -1,0 +1,344 @@
+
+*Database Schema*
+-- User Table
+CREATE TABLE users (
+id SERIAL PRIMARY KEY,
+username VARCHAR(50) NOT NULL,
+email VARCHAR(100) NOT NULL,
+password VARCHAR(255) NOT NULL,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Document Table
+CREATE TABLE documents (
+id SERIAL PRIMARY KEY,
+title VARCHAR(100) NOT NULL,
+file_type VARCHAR(10) NOT NULL,
+file_data BYTEA NOT NULL,
+uploaded_by INTEGER REFERENCES users(id),
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Document Metadata Table
+CREATE TABLE document_metadata (
+id SERIAL PRIMARY KEY,
+document_id INTEGER REFERENCES documents(id),
+author VARCHAR(50),
+description TEXT,
+keywords TEXT[]
+);
+
+-- Question Table
+CREATE TABLE questions (
+id SERIAL PRIMARY KEY,
+user_id INTEGER REFERENCES users(id),
+question_text TEXT NOT NULL,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Answer Table
+CREATE TABLE answers (
+id SERIAL PRIMARY KEY,
+question_id INTEGER REFERENCES questions(id),
+answer_text TEXT NOT NULL,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- RAG Agent Table
+CREATE TABLE rag_agents (
+id SERIAL PRIMARY KEY,
+name VARCHAR(50) NOT NULL,
+description TEXT,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- RAG Agent Query Table
+CREATE TABLE rag_agent_queries (
+id SERIAL PRIMARY KEY,
+rag_agent_id INTEGER REFERENCES rag_agents(id),
+query_text TEXT NOT NULL,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+*Classes and Functions*
+
+# User Class
+class User:
+def __init__(self, id, username, email):
+(link unavailable) = id
+self.username = username
+self.email = email
+
+def upload_document(self, document):
+# Upload document logic
+
+def ask_question(self, question):
+# Ask question logic
+
+# Document Class
+class Document:
+def __init__(self, id, title, file_type):
+(link unavailable) = id
+self.title = title
+self.file_type = file_type
+
+def parse_content(self):
+# Parse document content logic using (link unavailable)
+
+# RAG Agent Class
+class RAGAgent:
+def __init__(self, id, name):
+(link unavailable) = id
+self.name = name
+
+def query(self, query_text):
+# Query logic using NLP and document metadata
+
+# Question Class
+class Question:
+def __init__(self, id, user_id, question_text):
+(link unavailable) = id
+self.user_id = user_id
+self.question_text = question_text
+
+def get_answer(self):
+# Get answer logic using RAG agent
+
+# Answer Class
+class Answer:
+def __init__(self, id, question_id, answer_text):
+(link unavailable) = id
+self.question_id = question_id
+self.answer_text = answer_text
+```
+
+Note:-
+
+
+
+*System Components*
+
+
+1. *Frontend*: Client-side application (React/Angular/Vue) for users to interact with the system.
+2. *Backend*: Server-side application (Node.js/Python) handling document uploads, storage, and management.
+3. *AWS S3*: Cloud-based object storage for storing documents.
+4. *Database*: Relational database (MySQL/PostgreSQL) for storing document metadata.
+
+
+*Database Schema*
+
+
+CREATE TABLE documents (
+  id SERIAL PRIMARY KEY,
+  file_name VARCHAR(255) NOT NULL,
+  file_type VARCHAR(50) NOT NULL,
+  file_size INTEGER NOT NULL,
+  upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  user_id INTEGER REFERENCES users(id)
+);
+
+
+*Backend Implementation*
+import boto3
+from flask import Flask, request, jsonify
+
+
+app = Flask(__name__)
+
+
+s3 = boto3.client('s3', aws_access_key_id='YOUR_ACCESS_KEY',
+                         aws_secret_access_key='YOUR_SECRET_KEY')
+
+
+@app.route('/upload', methods=['POST'])
+def upload_document():
+    file = request.files['file']
+    file_name = file.filename
+    file_type = file.content_type
+    file_size = file.content_length
+
+
+    # Validate file type and size
+    if file_type not in ['application/pdf', 'application/vnd.ms-powerpoint']:
+        return jsonify({'error': 'Invalid file type'}), 400
+
+
+    # Upload file to S3
+    s3.put_object(Body=file, Bucket='your-bucket-name', Key=file_name)
+
+
+    # Store document metadata in database
+    db.session.add(Document(file_name=file_name, file_type=file_type, file_size=file_size))
+    db.session.commit()
+
+
+
+
+*NLP Processing Module*
+
+1. *Text Input*: Receive parsed text from (link unavailable)
+2. *Tokenization*: Tokenize text into individual words or phrases.
+3. *Part-of-Speech Tagging*: Identify part-of-speech tags (noun, verb, etc.).
+4. *Named Entity Recognition*: Identify named entities (people, organizations, etc.).
+5. *Sentiment Analysis*: Analyze sentiment of text.
+
+*Metadata Extraction*
+
+1. *Author Extraction*: Extract author information.
+2. *Creation Date Extraction*: Extract creation date.
+3. *Modification Date Extraction*: Extract modification date.
+4. *File Type Extraction*: Extract file type.
+5. *Keyword Extraction*: Extract relevant keywords.
+
+*Metadata Database Schema*
+
+```
+CREATE TABLE metadata (
+id SERIAL PRIMARY KEY,
+document_id INTEGER REFERENCES documents(id),
+author VARCHAR(255),
+creation_date DATE,
+modification_date DATE,
+file_type VARCHAR(50),
+keywords TEXT[]
+);
+```
+
+*Document Storage Schema*
+
+```
+CREATE TABLE documents (
+id SERIAL PRIMARY KEY,
+file_name VARCHAR(255),
+file_type VARCHAR(50),
+file_size INTEGER,
+parsed_text TEXT,
+uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+*Code Example (Python)*
+```
+import requests
+
+# (link unavailable) API endpoint
+api_endpoint = "(link unavailable)"
+
+# API key
+api_key = "YOUR_API_KEY"
+
+# Document upload
+document = open("example.pdf", "rb")
+
+# Parse document
+response = requests.post(api_endpoint, headers={"Authorization": f"Bearer {api_key}"}, files={"document": document})
+
+# Extract metadata and text
+metadata = response.json()["metadata"]
+text = response.json()["text"]
+
+# Store metadata and text in database
+db.session.add(Document(file_name="example.pdf", parsed_text=text))
+db.session.add(Metadata(document_id=1, author=metadata["author"], creation_date=metadata["creation_date"]))
+db.session.commit()
+
+Note:-
+*Source Code*
+
+- Well-commented source code in GitHub repository
+- Follows best practices for coding standards, naming conventions, and documentation
+- Includes:
+- Frontend (React/Angular/Vue)
+- Backend (Node.js/Python)
+- Document parsing using (link unavailable)
+- RAG agent integration
+- Logging configuration
+
+*Documentation*
+
+- README:
+- Setup instructions
+- API documentation
+- Architecture diagrams
+- Deployment guide
+- API Documentation:
+- Swagger/OpenAPI specification
+- API endpoint descriptions
+- Request/response examples
+- Architecture Diagrams:
+- System architecture
+- Component interactions
+- Data flow
+
+*Demo*
+
+- Live demo or screencast showcasing:
+- Application functionality
+- Deployment steps
+- Logging and monitoring setup
+
+*Low-Level Design Diagram Evaluation Criteria*
+
+- System Design:
+- Scalable architecture
+- Secure data handling
+- Maintainable codebase
+- Code Quality:
+- Clean and efficient code
+- Modular design
+- Reusability
+- Deployment Proficiency:
+- Successful containerization
+- Kubernetes deployment
+- Monitoring and logging setup
+- Innovation:
+- Novel features or technologies
+- Enhanced application value
+- Easy to add features without modifying existing code
+
+*Additional Requirements*
+
+- Document Parsing:
+- Integrate (link unavailable) for advanced parsing capabilities
+- Handle various document formats (PDF, PPT, CSV, etc.)
+- Deployment:
+- Detailed steps for deploying the application in a containerized environment using Kubernetes
+- Scaling, monitoring, and logging setup
+
+*ELK Stack Setup*
+
+- Elasticsearch:
+- Configure indexing and mapping
+- Set up data ingestion
+- Logstash:
+- Configure log processing and filtering
+- Output to Elasticsearch
+- Kibana:
+- Visualize logs and metrics
+- Create dashboards
+
+*Kubernetes Deployment*
+
+- Create Docker images for frontend, backend, and microservices
+- Write Kubernetes manifests (Deployment, Service, ConfigMap)
+- Deploy application components
+- Configure scaling, monitoring, and logging
+
+*Monitoring and Logging*
+
+- Prometheus:
+- Configure metrics scraping
+- Alerting setup
+- Grafana:
+- Visualize metrics and logs
+- Create dashboards
+
+*Delivery*
+
+- GitHub repository with source code and documentation
+- Live demo or screencast
+- Written report detailing system design, deployment, and innovation 
+
+
+
+Thank you
+
